@@ -30,3 +30,15 @@
 *.exe
 *.out
 *.app
+<<<<<<< HEAD
+=======
+
+# vs workspaces
+*.code-workspace
+
+# folders
+.vscode/
+
+#stackdumps
+*.stackdump
+>>>>>>> 5885f5e (initiated new)
