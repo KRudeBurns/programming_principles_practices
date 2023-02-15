@@ -1,0 +1,267 @@
+ch 6 (Notes)
+
+The purpose of writing a program is to solve a problem.
+
+First of all, the program needs to solve the right problem. This means you need to understand what the problem is.
+
+Chapter 6's focus is to create a program that does the following:
+1- Illustrates design and programming techniques
+2- Allows exploration into a programmers decision making process
+3- Uses basic language constructs
+4- is thought provoking about it's design principles
+5- Allows variations in it's solution
+6- solves an easily understood problem
+7- solves a worthwhile problem
+8- provides a solution that is small enough to comprehend
+
+The problem we want to solve is:
+- Get the computer to do ordinary arithmetic on expressions we type in.
+
+Stages of development
+- Analysis: figure out what the problem is, and create a description of your understanding for the solution. This is known as the specifications or the set of requirements.
+
+- Design: this stage is where I create a structure for the solution. i will want to design what the solution should have and how the solutions communicate. 
+   This is also the stage i decide what tools i will use for the solution.
+   
+- Implementation: here is the coding, debugging, and testing stage.
+
+
+6.3 Back to the calculator
+- How do I want to interact with the calculator?
+  - I want to use the terminal. 
+     - I, the user, want to put in the expression. 	    
+	 - I want the computer to give me a result
+	 (Example -- 
+	     Expression: 2 + 2
+		 Result: 4
+		 
+		 Expression: 2 + 2 * 3
+		 Result: 8
+		 
+		 Expression: 2 + 3 - 5/25
+		 Result: 0
+     )
+	 
+- A simple outline of the program in psuedocode is as follows
+   read_a_line
+   calculate //do the work
+   write_result
+   
+Based off this preliminary thoughts - we can write a very rough first draft. see below.
+
+int main() {
+
+    cout << "Please enter expression (we can handle + and -): "; 
+	int lval = 0;
+	int rval;
+	char op;
+	int res;
+	
+	cin >> lval >> op >> rval;      //read in the expression eg: 2 + 2
+	
+	if (op == '+')
+	    res = lval + rval;    //addition
+	else if (op == '-')
+	    res = lval - rval;   //subtraction
+		
+    cout << "Result: " << res << "\n";
+	return 0;
+}
+
+
+This code works. It is very basic but functional. it is not a complete program yet.
+
+Our next step is to:
+1- clean up the code a bit
+2- add multiplication and division
+3- add the ability to handle more than one operand.
+
+Notes:
+ The chaining of operations such a 1+2+3+4 means we need to keep adding all entries until we have no more entries, and then we print out the result.
+ 
+ We also need to distinguish good entries from bad entries operation-wise.
+ 
+ So here is our solution:
+ 
+ int main()
+ {
+     cout << "Please enter expression (we can handle +,-,*, and /)\n";
+	 cout << "add an x to end expression (e.g., 1+2+3x): ";
+	 
+	 int lval = 0;
+	 int rval;
+	 
+	 cin >> lval;       //read the leftmost value
+	 if(!cin) 
+	 {
+	     cout << "no first operand\n";
+	     throw -1;   //throw an error if improper entry of lval.
+	 }
+	 
+	 for (char op; cin>>op)
+	 {
+	     if (op != 'x')  //read in rval if terminal token x is not yet read in.
+		    cin >> rval;
+			
+		 if (!cin)
+		 {
+		     cout << "no second operand\n";
+	         throw -1;   //throw an error if improper entry of rval.
+		 }
+		
+		switch(op)
+		{
+		    case '+':
+			    lval += rval;
+				break;
+		    case '-':
+			    lval -= rval;
+				break;				
+		    case '*':
+			    lval *= rval;
+				break;
+		    case '/':
+			    lval /= rval;
+				break;
+			default:             //no other operator, so print result
+			    cout << "Result: : << lval << "\n";
+				return 0;				
+		}
+	 }
+	 
+	 cout << "a bad expression entered\n";
+	 throw -1;
+ 
+ }
+ 
+ 
+ This calculator works but does not follow the strict BODMAS principle. It goes from left to right for all operations so that 1+2*3 is 9 instead of 7 as it should be. This is where the next phase of solving the problem begins.
+ 
+ 
+ ---------------------
+ 
+ - We need to be able to isolate operator symbols from the input
+ - We need to remember where the operator symbols occured
+ 
+ ----------------------
+ To do this the text suggests we tokenize the input. When we get input such as 
+ 45+11*7 
+ the program should read the characters into tokens representing
+ 
+ 45
+ +
+ 11
+ *
+ 7
+ -----------------------
+ A token is a sequence of characters that represents a unit, such as a number or an operator. For the calculator we want 3 kinds of tokens:
+  - floating-point literals 3.14, 0.274e2, 42
+  - operators + - / * %
+  - parentheses (,)
+ 
+ We will track the token using a (kind, value) paradigm. kind tells me the token is either a number, operator, or parentheses. value tells me what value it is.
+ 
+
+ ------------------------
+  To actually express this pair in code, we will want to define a type Token to represent tokens. We want an implementation that represents the kind of token and holds the value for the tokens that have one. As seen below:
+  
+ Token:
+	- - - - - - - - - 
+    | kind 	| plus	 |
+	- - - - - - - - - 
+	| value |		 |
+	- - - - - - - - -
+	
+Token:
+	- - - - - - - - - - - 
+    | kind 	| number	|
+	- - - - - - - - - - -
+	| value |  3.14 	|
+	- - - - - - - - - - - 
+	
+
+Here is the simplest representation:
+
+class Token {
+    public:
+	    char kind;
+		double value;
+}
+
+So with this user defined type we can define variables and hold values. Examples below:
+
+Token t;   //t is a token
+t.kind = '+';   // t represents a + and no value will be assigned.
+
+Token t2;   //t2 is another token
+t2.kind = '8';    //for now let 8 be the kind for numbers/digits.
+t2.value = 3.14;
+
+Another thing we can do is that we can copy the Tokens. Just as we do with built in data types.
+
+Token tt = t;    //copy initialization
+if (tt.kind != t.kind) error("impossible");
+t = t2;       //assignment
+cout << t.value;     //will print 3.14
+
+---------------
+
+We want to look at the problem of the calculator again a bit more analytically. 
+This way we will come up with a better solution than the prior ones.
+
+1. When the input is read the program should produce a list of tokens.
+
+2. When tne tokens have been produced the program should make sure the expression is  understood correctly. 
+
+So given an input of 
+45 + 11 / 7
+
+We should get a list of tokens representing 
+
+45
++
+11
+/
+7
+
+Which is understood as 
+45 + (11/7)
+
+not 
+(45+11)/7
+
+To teach the program to do this properly, we must write a GRAMMAR that defines the syntax of our input, and then write a program that implements the rules of that grammar.
+
+
+Lets Look at the example of a grammar:
+
+Expression:
+	Term
+	Expression "+" Term // addition
+	Expression "–" Term // subtraction
+Term:
+	Primary
+	Term "*" Primary // multiplication
+	Term "/" Primary // division
+	Term "%" Primary // remainder (modulo)
+Primary:
+	Number
+	"(" Expression ")" // grouping
+Number:
+	floating-point-literal
+	
+Read it top-down as follows:
+
+ 
+An Expression is a 
+	Term     ....... or an 
+	Expression followed by "an operator" followed by a Term
+A Term is a 
+  Primary ......... or a 
+  Term followed by "an operator" followed by a Primary 
+A Primary is a 
+	Number ........ or a 
+	"(" followed by an Expression followed by ")"	
+A Number is a
+	floating-point-literal	
+	
