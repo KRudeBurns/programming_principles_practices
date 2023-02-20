@@ -53,25 +53,54 @@ names[7]=="Joe" then scores[7]==17). Terminate input with NoName 0.
 Check that each name is unique and terminate with an error message if a name is entered twice.
 
 Write out all the (name,score) pairs, one per line.
+
 */
 
 int main()
 {
-    Name_value *nv = new Name_value;
-    nv->setName("James");
-    nv->setValue(152.35);
 
-    unique_ptr<Name_value> nv2(new Name_value);
-    nv2->setName("Roger");
-    nv2->setValue(352.32);
+    string name;
+    double score;
+    vector<Name_value> name_vals;
 
-    vector<Name_value *> name_vals;
-    name_vals.push_back(nv);
-    cout << name_vals.at(0)->getName() << endl;
-    cout << name_vals.at(0)->getValue() << endl;
+    while (true)
+    {
+        cout << "Enter a name and a value";
+        cout << "\n\'NoName\' and 0 will terminate\n";
+        cout << "name > ";
+        getline(cin, name);
+        cout << "score > ";
+        cin >> score;
+        cout << name << " " << score << "\n";
 
-    vector<unique_ptr<Name_value>> name_vals2;
-    name_vals2.emplace_back(move(nv2));
-    cout << name_vals2.at(0)->getName() << endl;
-    cout << name_vals2.at(0)->getValue() << endl;
+        if (name == "NoName" && score == 0)
+            break;
+
+        if (name_vals.empty())
+        {
+            name_vals.push_back(Name_value(name, score));
+        }
+        else
+            for (auto x : name_vals)
+            {                
+                if (name.compare(x.getName()) == 0)
+                {
+                    cout << "Not adding duplicate!\n";
+                    break;
+                }
+
+                name_vals.push_back(Name_value(name, score));
+            }
+
+        // reset to create a new space again
+        getchar();
+        cin.clear();
+    }
+
+    // print
+    for (auto i : name_vals)
+    {
+        cout << i.getName() << " "
+             << i.getValue() << endl;
+    }
 }

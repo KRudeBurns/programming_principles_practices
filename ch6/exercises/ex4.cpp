@@ -22,5 +22,5 @@ class Name_value {
 
 int main()
 {
-    cout << "hello";
+    Name_value my_name;
 }
